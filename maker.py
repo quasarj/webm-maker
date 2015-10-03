@@ -7,6 +7,8 @@ import hotpy
 import uploader
 import namer
 
+import config
+
 VERSION = '1.1'
 
 PID = None
@@ -48,8 +50,8 @@ def cleanup(name):
 def encode_video(name):
     p = subprocess.Popen('ffmpeg\\ffmpeg.exe '
             '-i - '
-            '-c:v libvpx -b:v 10000k '
-            '{}.webm'.format(name),
+            ' {} '
+            ' {}.webm'.format(config.encode_parameters, name),
             bufsize=64,
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         stdin=subprocess.PIPE)
@@ -61,6 +63,11 @@ def encode_video(name):
 def get_title(hwnd):
     return win32gui.GetWindowText(hwnd)
 
+def get_scale_setting():
+    if config.half_size_capture:
+        return '-vf "scale=\'iw/2\':-1" '
+    else:
+        return ''
 
 def start_capture():
     global PID
@@ -71,14 +78,18 @@ def start_capture():
 
     name = namer.get_name()
 
-    PID = subprocess.Popen('ffmpeg\\ffmpeg.exe -f gdigrab -i title="{}" '
-                '-framerate 15 -vf "scale=\'iw/2\':-1" '
+    PID = subprocess.Popen('ffmpeg\\ffmpeg.exe -f gdigrab -i title="{title}" '
+                '-framerate 15 '
+                '{scale} '
                 '-c:v rawvideo -pix_fmt yuv420p '
-                '{}.avi'.format(title, name),
+                '{name}.avi'.format(title=title,
+                                    name=name,
+                                    scale=get_scale_setting()),
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         stdin=subprocess.PIPE)
 
-    print("\nCapturing has begun. Press Alt+F9 again to stop!\n")
+    print("\nCapturing has begun. Press {} again to stop!\n".format(
+         hotkey_printable_name(config.record_hotkey)))
 
 
 def stop_capture():
@@ -115,21 +126,32 @@ def handle_f9():
     else:
         stop_capture()
 
+def hotkey_printable_name(hotkey):
+    key, *modifiers = hotkey
+
+    # break out of outter list, if set
+    if len(modifiers) > 0:
+        modifiers = modifiers[0]
+
+    return '+'.join(['+'.join(modifiers), key])
 
 def main():
-    hotpy.register(handle_f9, 'F9', ['Alt'])
-    hotpy.register(lambda: False, 'F9', ['Ctrl'])  # exit
+    hotpy.register(handle_f9, *config.record_hotkey)
+    hotpy.register(lambda: False, *config.exit_hotkey)
 
     print("A Series of Tubes, v{}".format(VERSION))
     print("A simple webm maker")
 
     print("\nBrought to you by Quasar, Joseph, and The Cult of Done\n")
 
-    print("Press Alt+F9 to start recording!")
-    print("Press Ctrl+F9 to exit.\n\n")
+    print("Press {} to start recording!".format(
+         hotkey_printable_name(config.record_hotkey)))
+    print("Press {} to exit.\n\n".format(
+         hotkey_printable_name(config.exit_hotkey)))
 
     hotpy.listen()
 
 
 if __name__ == '__main__':
     main()
+    #encode_video('CTfVXOW')

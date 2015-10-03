@@ -1,1 +1,5 @@
 settings.py
+*.webm
+*.avi
+*.zip
+__pycache__
