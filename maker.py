@@ -1,5 +1,6 @@
 import win32gui
 import os
+import webbrowser
 import subprocess
 import progressbar
 
@@ -104,7 +105,7 @@ def stop_capture():
     cleanup(name)
 
     print('\n\n{}\n\n'.format(url))
-    os.system('start {}'.format(url))
+    webbrowser.open(url)
 
 
 def handle_f9():
