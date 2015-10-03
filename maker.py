@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0, '.')  # Fix for config loading from py2exe
+
 import win32gui
 import os
 import webbrowser
@@ -10,7 +13,7 @@ import namer
 
 import config
 
-VERSION = '1.2'
+VERSION = '1.2.1'
 
 PID = None
 name = None
