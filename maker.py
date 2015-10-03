@@ -40,11 +40,12 @@ def feed_file_to_handle_with_progress(filename, handle):
 
 
 def cleanup(name):
-    try:
-        os.unlink('{}.avi'.format(name))
-        os.unlink('{}.webm'.format(name))
-    except FileNotFoundError:
-        pass
+    if config.cleanup:
+        try:
+            os.unlink('{}.avi'.format(name))
+            os.unlink('{}.webm'.format(name))
+        except FileNotFoundError:
+            pass
 
 
 def encode_video(name):
