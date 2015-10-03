@@ -10,7 +10,7 @@ import namer
 
 import config
 
-VERSION = '1.1'
+VERSION = '1.2'
 
 PID = None
 name = None
