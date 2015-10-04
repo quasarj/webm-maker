@@ -4,19 +4,24 @@ import progressbar
 import settings
 
 def make_progress_callback():
-    bar = None
+    widgets = [progressbar.Percentage(), ' ',
+               progressbar.Bar(), ' ',
+               progressbar.ETA(), ' ',
+               progressbar.FileTransferSpeed()]
+
+    bar = progressbar.ProgressBar(widgets=widgets)
 
     def progress(current, total):
         nonlocal bar
         if bar is None:
-            widgets = [progressbar.Percentage(), ' ',
-                       progressbar.Bar(), ' ',
-                       progressbar.ETA(), ' ',
-                       progressbar.FileTransferSpeed()]
-            bar = progressbar.ProgressBar(widgets=widgets, maxval=total)
-            bar.start()
+            return
+
+        bar.maxval = total
+
         if current == total:
             bar.finish()
+            bar = None  # delete the bar instance to make sure we
+                        # we don't call update() again
         else:
             bar.update(current)
 
@@ -32,7 +37,6 @@ def upload(source_filename, dest_filename):
                    password=settings.password)
     sftp = client.open_sftp()
 
-    # print("Connected, beginning upload...")
     sftp.put(source_filename, 'tubes/' + dest_filename, make_progress_callback())
 
     # print("Complete, exiting")
